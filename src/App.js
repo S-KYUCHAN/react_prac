@@ -1,27 +1,48 @@
 import React from 'react';
-import PropTypes from "prop-types";
+import axios from 'axios';
+import Movie from './Movie';
+import "./App.css"
 
 class App extends React.Component {
   state = {
-    count: 0
-  };       // state : object
-
-  add = () => {
-    //this.setState({count: this.state.count + 1 });
-    this.setState(current => ({ count: current.count + 1 }));   //더 좋은 방법
+    isLoading: true,
+    movies: []
   };
-
-  minus = () => {
-    this.setState({count: this.state.count -1 });
+  
+  getMovies = async () => {
+    const {data: {data: {movies}}} = await axios.get("https://yts-proxy.now.sh/list_movies.json")
+    this.setState({ movies, isLoading: false })
   };
+  
+  componentDidMount() {
+    this.getMovies();
+  }
   render() {
+    const {isLoading, movies} = this.state;
     return (
-      <div>
-        <h1>The number is : {this.state.count} </h1>
-        <button onClick={this.add}>Add</button>
-        <button onClick={this.minus}>Minus</button>
-      </div>
-    )
+      <section class="container"> 
+      {isLoading ? (
+        <div class="loader">
+          <span class="loader_text">Loading...</span>
+        </div>
+        ) : (
+          <div class="movies">
+            {movies.map(movie => (
+              <Movie 
+              key={movie.id} 
+              id={movie.id} 
+              year={movie.year} 
+              title={movie.title} 
+              rating={movie.rating} 
+              runtime={movie.runtime} 
+              summary={movie.summary} 
+              poster={movie.medium_cover_image}/>
+            ))}
+          </div>
+        )
+      }
+      </section>
+    );
   }
 }
 
